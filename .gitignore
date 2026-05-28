@@ -1,0 +1,58 @@
+# ──────────────────────────────────────────────
+# 🔥 Fire Detection Project — .gitignore
+# ──────────────────────────────────────────────
+
+# Large Dataset Files (download from Kaggle separately)
+datasets/fire/
+*.zip
+*.tar.gz
+*.tar
+
+# Model Weights (large binary files)
+# model/yolov5s_best.pt    ← Uncomment to exclude weights too
+# *.pt
+# *.pth
+# *.onnx
+
+# YOLOv5 / YOLOv9 training output
+runs/
+exp/
+
+# Input / output videos
+*.mp4
+*.avi
+*.mov
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/

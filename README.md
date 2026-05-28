@@ -1,95 +1,260 @@
-<h1 align="center"><span>YOLOv5/YOLOv9 for Fire Detection</span></h1>
-
-Fire detection task aims to identify fire or flame in a video and put a bounding box around it. This repo includes a demo on how to build a fire detector using YOLOv5/YOLOv9. 
+<h1 align="center">🔥 Fire Detection using YOLOv5 & YOLOv9</h1>
 
 <p align="center">
-  <img src="results/result.gif" />
+  <img src="https://img.shields.io/badge/Model-YOLOv5%20%7C%20YOLOv9-orange?style=for-the-badge&logo=pytorch" />
+  <img src="https://img.shields.io/badge/Framework-Ultralytics-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Interface-Gradio-blueviolet?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Platform-Google%20Colab-yellow?style=for-the-badge&logo=google-colab" />
 </p>
 
-## 🛠️ Installation
-1. Clone this repo 
-``` shell
-# Clone
-git clone https://github.com/spacewalk01/yolov5-fire-detection.git
-cd Yolov5-Fire-Detection
+<p align="center">
+  Real-time fire and flame detection using state-of-the-art YOLO object detection models, 
+  complete with a Gradio web interface for image and video inference.
+</p>
+
+<p align="center">
+  <img src="results/result.gif" width="80%" alt="Fire Detection Demo" />
+</p>
+
+---
+
+## 📌 Project Overview
+
+This project implements an **automated fire detection system** using YOLOv5 and YOLOv9 deep learning models. The system can detect fire/flame in:
+- **Static images** — bounding box prediction with confidence scores
+- **Live video streams / recorded videos** — frame-by-frame fire detection
+- **Interactive Gradio demo** — easy-to-use web UI for real-time inference
+
+The model was trained on a filtered version of the [Fire and Gun Dataset](https://www.kaggle.com/datasets/atulyakumar98/fire-and-gun-dataset) from Kaggle, keeping only fire-annotated images.
+
+---
+
+## 📁 Project Structure
+
+```
+yolov5-fire-detection/
+│
+├── fire_model.ipynb       # Gradio inference demo (loads model from Drive or local)
+├── train.ipynb            # Full YOLOv5/YOLOv9 training pipeline notebook
+├── fire.yaml              # Dataset configuration file (paths + class names)
+│
+├── model/
+│   └── yolov5s_best.pt    # Pretrained YOLOv5s model weights (fire-tuned)
+│
+├── datasets/
+│   └── fire/              # Dataset directory (train/val images + labels)
+│
+├── results/
+│   ├── result.gif         # Demo inference GIF
+│   ├── P_curve.png        # Precision curve
+│   ├── PR_curve.png       # Precision-Recall curve
+│   ├── R_curve.png        # Recall curve
+│   ├── F1_curve.png       # F1 score curve
+│   ├── results.png        # Training metrics summary
+│   ├── val_batch2_labels_*.jpg   # Ground truth validation samples
+│   └── val_batch2_pred_*.jpg     # Model predictions on validation samples
+│
+└── input.mp4              # Sample input video for inference
 ```
 
-2. Install [YOLOv5](https://github.com/ultralytics/yolov5). 
-``` shell
-git clone https://github.com/ultralytics/yolov5.git 
+---
+
+## ⚙️ Installation
+
+### 1. Clone this repository
+```bash
+git clone https://github.com/<your-username>/fire-detection.git
+cd fire-detection
+```
+
+### 2. Install YOLOv5 dependencies
+```bash
+git clone https://github.com/ultralytics/yolov5.git
 cd yolov5
 pip install -r requirements.txt
 ```
 
-3. Or install [YOLOv9](https://github.com/WongKinYiu/yolov9.git)
-``` shell
+### 3. (Optional) Install YOLOv9 dependencies
+```bash
 git clone https://github.com/WongKinYiu/yolov9.git
 cd yolov9
 pip install -r requirements.txt
 ```
 
+### 4. Install Gradio for the demo interface
+```bash
+pip install ultralytics gradio
+```
+
+---
+
+## 🗂️ Dataset
+
+The model was trained on a custom fire dataset derived from the [Fire and Gun Dataset](https://www.kaggle.com/datasets/atulyakumar98/fire-and-gun-dataset).
+
+**Preprocessing steps applied:**
+- Filtered only fire-labeled images (removed gun-only annotations)
+- Removed low-resolution images
+- Relabeled annotations to a single class: `fire`
+- Split into `train/` and `val/` sets
+
+**Dataset configuration (`fire.yaml`):**
+```yaml
+path: ../datasets/fire/fire
+train: train/images
+val: val/images
+nc: 1
+names: ['fire']
+```
+
+> ⚠️ The full dataset is **not included** in this repo due to size. Download it from [Kaggle](https://www.kaggle.com/datasets/atulyakumar98/fire-and-gun-dataset) and place it in the `datasets/` folder.
+
+---
+
 ## 🏋️ Training
-I set up ```train.ipynb``` script for training the model from scratch. To train the model, download [Fire-Dataset](https://www.kaggle.com/datasets/atulyakumar98/fire-and-gun-dataset) and put it in ```datasets``` folder. I filtered out images and annotations that contain fire and guns as well as images with low resolution, and then changed fire annotation's label in annotation files.
 
-- YOLOv5
-```
-python train.py --img 640 --batch 16 --epochs 10 --data ../fire.yaml --weights yolov5s.pt --workers 0
-```
+Open `train.ipynb` to run the full training pipeline. Make sure the dataset is placed under `datasets/fire/`.
 
-- YOLOv9
-```
-python train_dual.py --workers 4 --device 0 --batch 16 --data ../fire.yaml --img 640 --cfg models/detect/yolov9-c.yaml --weights '' --name yolov9-c --hyp hyp.scratch-high.yaml --min-items 0 --epochs 50 --close-mosaic 15
-```
-
-## 🌱 Inference
-
-- YOLOv5
-  
-If you train your own model, use the following command for detection:
-``` shell
-python detect.py --source ../input.mp4 --weights runs/train/exp/weights/best.pt --conf 0.2
-```
-Or you can use the pretrained model located in ```models``` folder for detection as follows:
-``` shell
-python detect.py --source ../input.mp4 --weights ../models/yolov5s_best.pt --conf 0.2
+**YOLOv5 Training Command:**
+```bash
+python train.py \
+  --img 640 \
+  --batch 16 \
+  --epochs 10 \
+  --data ../fire.yaml \
+  --weights yolov5s.pt \
+  --workers 0
 ```
 
-- YOLOv9
-
-``` shell
-python detect.py --weights runs/train/yolov9-c2/weights/best.pt --source ../input.mp4
+**YOLOv9 Training Command:**
+```bash
+python train_dual.py \
+  --workers 4 \
+  --device 0 \
+  --batch 16 \
+  --data ../fire.yaml \
+  --img 640 \
+  --cfg models/detect/yolov9-c.yaml \
+  --weights '' \
+  --name yolov9-c \
+  --hyp hyp.scratch-high.yaml \
+  --min-items 0 \
+  --epochs 50 \
+  --close-mosaic 15
 ```
 
-You can download the pretrained yolov9-c.pt model from [google drive](https://drive.google.com/file/d/1nV5C3dbc_Q3CoczHaERTojr78-SFPdMI/view?usp=sharing) for fire detection. Note that this model was trained on the fire dataset for 50 epochs. Refer to [link](https://github.com/WongKinYiu/yolov9/issues/162) to fix for detect.py runtime error when running yolov9.
+---
 
-## ⏱️ Results
-The following charts were produced after training YOLOv5s with input size 640x640 on the fire dataset for 10 epochs.
+## 🔍 Inference
 
-| P Curve | PR Curve | R Curve |
-| :-: | :-: | :-: |
-| ![](results/P_curve.png) | ![](results/PR_curve.png) | ![](results/R_curve.png) |
-
-#### Prediction Results
-The fire detection results were fairly good even though the model was trained only for a few epochs. However, I observed that the trained model tends to predict red emergency light on top of police car as fire. It might be due to the fact that the training dataset contains only a few hundreds of negative samples. We may fix such problem and further improve the performance of the model by adding images with non-labeled fire objects as negative samples. The [authors](https://github.com/ultralytics/yolov5/wiki/Tips-for-Best-Training-Results) who created YOLOv5 recommend using about 0-10% background images to help reduce false positives. 
-
-| Ground Truth | Prediction | 
-| :-: | :-: |
-| ![](results/val_batch2_labels_1.jpg) | ![](results/val_batch2_pred_1.jpg) |
-| ![](results/val_batch2_labels_2.jpg) | ![](results/val_batch2_pred_2.jpg) | 
-
-#### Feature Visualization
-It is desirable for AI engineers to know what happens under the hood of object detection models. Visualizing features in deep learning models can help us a little bit understand how they make predictions. In YOLOv5, we can visualize features using ```--visualize``` argument as follows:
-
-```
-python detect.py --weights runs/train/exp/weights/best.pt --img 640 --conf 0.2 --source ../datasets/fire/val/images/0.jpg --visualize
+### Using your trained model (YOLOv5):
+```bash
+python detect.py \
+  --source ../input.mp4 \
+  --weights runs/train/exp/weights/best.pt \
+  --conf 0.2
 ```
 
-| Input | Feature Maps | 
-| :-: | :-: |
-| ![](results/004dec94c5de631f.jpg) | ![](results/stage23_C3_features.png) |
+### Using the pretrained model from `model/` folder:
+```bash
+python detect.py \
+  --source ../input.mp4 \
+  --weights ../models/yolov5s_best.pt \
+  --conf 0.2
+```
 
-## 🔗 Reference
-I borrowed and modified [YOLOv5-Custom-Training.ipynb](https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data) script for training YOLOv5 model on the fire dataset. For more information on training YOLOv5, please refer to its homepage.
-* https://github.com/robmarkcole/fire-detection-from-images
-* https://github.com/ultralytics/yolov5
-* https://github.com/AlexeyAB/darknet
+### YOLOv9 Inference:
+```bash
+python detect.py \
+  --weights runs/train/yolov9-c2/weights/best.pt \
+  --source ../input.mp4
+```
+
+> 📥 Download the pretrained YOLOv9-c model from [Google Drive](https://drive.google.com/file/d/1nV5C3dbc_Q3CoczHaERTojr78-SFPdMI/view?usp=sharing)
+
+---
+
+## 🖥️ Gradio Web Interface
+
+Open `fire_model.ipynb` in Google Colab or Jupyter. This notebook:
+
+1. **Mounts Google Drive** to load your trained model
+2. **Launches a Gradio web UI** with two tabs:
+   - 🖼️ **Image Tab** — Upload an image to detect fire
+   - 🎥 **Video Tab** — Upload a video for frame-by-frame detection
+
+```python
+# Auto-detects environment (Colab or local)
+# Loads model from Drive or local path
+# Launches Gradio with public share link
+demo.launch(share=True)
+```
+
+---
+
+## 📊 Results
+
+Training YOLOv5s on the fire dataset for **10 epochs** at 640×640 resolution:
+
+| Metric | Curve |
+|:------:|:-----:|
+| Precision | ![P Curve](results/P_curve.png) |
+| Precision-Recall | ![PR Curve](results/PR_curve.png) |
+| Recall | ![R Curve](results/R_curve.png) |
+| F1 Score | ![F1 Curve](results/F1_curve.png) |
+
+### Validation Predictions
+
+| Ground Truth | Prediction |
+|:---:|:---:|
+| ![Label 1](results/val_batch2_labels_1.jpg) | ![Pred 1](results/val_batch2_pred_1.jpg) |
+| ![Label 2](results/val_batch2_labels_2.jpg) | ![Pred 2](results/val_batch2_pred_2.jpg) |
+
+### 🔎 Feature Visualization
+
+Visualize internal CNN feature maps using:
+```bash
+python detect.py \
+  --weights runs/train/exp/weights/best.pt \
+  --img 640 \
+  --conf 0.2 \
+  --source ../datasets/fire/val/images/0.jpg \
+  --visualize
+```
+
+| Input Image | Feature Maps (Stage 23 C3) |
+|:-----------:|:--------------------------:|
+| ![Input](results/004dec94c5de631f.jpg) | ![Features](results/stage23_C3_features.png) |
+
+---
+
+## 🧠 Key Observations
+
+- ✅ The model performs well on real-world fire scenarios even after just 10 epochs
+- ⚠️ Occasionally misclassifies **red emergency lights** (e.g., police car lights) as fire
+- 💡 Adding **background/negative samples** (images with no fire) improves false positive rates
+- 📖 YOLOv5 authors recommend using **0–10% background images** for best results
+
+---
+
+## 🔗 References
+
+- [YOLOv5 by Ultralytics](https://github.com/ultralytics/yolov5)
+- [YOLOv9 by WongKinYiu](https://github.com/WongKinYiu/yolov9)
+- [Fire Detection from Images](https://github.com/robmarkcole/fire-detection-from-images)
+- [Darknet / AlexeyAB](https://github.com/AlexeyAB/darknet)
+- [Fire and Gun Dataset — Kaggle](https://www.kaggle.com/datasets/atulyakumar98/fire-and-gun-dataset)
+
+---
+
+## 👤 Author
+
+**Muhammad Wajiz**  
+AI/ML Intern — DevelopersHub Corporation  
+📌 *This project is part of an AI/ML Internship program.*
+
+---
+
+<p align="center">
+  ⭐ Star this repo if you found it helpful!
+</p>
